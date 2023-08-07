@@ -40,6 +40,11 @@ type IDTokenLifespanProvider interface {
 	GetIDTokenLifespan(ctx context.Context) time.Duration
 }
 
+// JWTSecuredAuthorizeResponseModeLifespanProvider returns the provider for configuring the JWT Secured Authorize Response Mode token lifespan.
+type JWTSecuredAuthorizeResponseModeLifespanProvider interface {
+	GetJWTSecuredAuthorizeResponseModeLifespan(ctx context.Context) time.Duration
+}
+
 // ScopeStrategyProvider returns the provider for configuring the scope strategy.
 type ScopeStrategyProvider interface {
 	// GetScopeStrategy returns the scope strategy.
@@ -92,6 +97,18 @@ type AccessTokenIssuerProvider interface {
 type IDTokenIssuerProvider interface {
 	// GetIDTokenIssuer returns the ID token issuer.
 	GetIDTokenIssuer(ctx context.Context) string
+}
+
+// JWTSecuredAuthorizeResponseModeIssuerProvider returns the provider for configuring the JARM issuer.
+type JWTSecuredAuthorizeResponseModeIssuerProvider interface {
+	// GetJWTSecuredAuthorizeResponseModeIssuer returns the JARM issuer.
+	GetJWTSecuredAuthorizeResponseModeIssuer(ctx context.Context) string
+}
+
+// JWTSecuredAuthorizeResponseModeSignerProvider returns the provider for configuring the JARM signer.
+type JWTSecuredAuthorizeResponseModeSignerProvider interface {
+	// GetJWTSecuredAuthorizeResponseModeSigner returns the JARM signer.
+	GetJWTSecuredAuthorizeResponseModeSigner(ctx context.Context) jwt.Signer
 }
 
 // JWTScopeFieldProvider returns the provider for configuring the JWT scope field.

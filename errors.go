@@ -286,6 +286,15 @@ func ErrorToRFC6749Error(err error) *RFC6749Error {
 	}
 }
 
+func ErrorToRFC6749ErrorFallback(err error, fallback *RFC6749Error) *RFC6749Error {
+	var e *RFC6749Error
+	if errors.As(err, &e) {
+		return e
+	}
+
+	return fallback.WithWrap(err).WithDebug(err.Error())
+}
+
 // StackTrace returns the error's stack trace.
 func (e *RFC6749Error) StackTrace() (trace errors.StackTrace) {
 	if e.cause == e || e.cause == nil {

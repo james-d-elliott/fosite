@@ -32,6 +32,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeDefault)
 				resp.EXPECT().GetParameters().Return(url.Values{})
@@ -51,6 +53,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeFragment)
 				resp.EXPECT().GetParameters().Return(url.Values{"bar": {"baz"}})
@@ -70,6 +74,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeQuery)
 				resp.EXPECT().GetParameters().Return(url.Values{"bar": {"baz"}})
@@ -90,6 +96,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeFragment)
 				resp.EXPECT().GetParameters().Return(url.Values{"bar": {"b+az ab"}})
@@ -110,6 +118,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeQuery)
 				resp.EXPECT().GetParameters().Return(url.Values{"bar": {"b+az"}, "scope": {"a b"}})
@@ -132,6 +142,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeFragment)
 				resp.EXPECT().GetParameters().Return(url.Values{"scope": {"api:*"}})
@@ -152,6 +164,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar#bar=baz")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeFragment)
 				resp.EXPECT().GetParameters().Return(url.Values{"qux": {"quux"}})
@@ -171,6 +185,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeFragment)
 				resp.EXPECT().GetParameters().Return(url.Values{"state": {"{\"a\":\"b=c&d=e\"}"}})
@@ -190,6 +206,8 @@ func TestWriteAuthorizeResponse(t *testing.T) {
 		{
 			setup: func() {
 				redir, _ := url.Parse("https://foobar.com/?foo=bar")
+				ar.EXPECT().GetClient().Return(&DefaultClient{})
+				ar.EXPECT().GetSession().Return(&DefaultSession{})
 				ar.EXPECT().GetRedirectURI().Return(redir)
 				ar.EXPECT().GetResponseMode().Return(ResponseModeFormPost)
 				resp.EXPECT().GetHeader().Return(http.Header{"X-Bar": {"baz"}})

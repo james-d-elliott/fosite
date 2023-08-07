@@ -10,10 +10,14 @@ import (
 type ResponseModeType string
 
 const (
-	ResponseModeDefault  = ResponseModeType("")
-	ResponseModeFormPost = ResponseModeType("form_post")
-	ResponseModeQuery    = ResponseModeType("query")
-	ResponseModeFragment = ResponseModeType("fragment")
+	ResponseModeDefault     = ResponseModeType("")
+	ResponseModeFormPost    = ResponseModeType("form_post")
+	ResponseModeQuery       = ResponseModeType("query")
+	ResponseModeFragment    = ResponseModeType("fragment")
+	ResponseModeJWTFormPost = ResponseModeType("form_post.jwt")
+	ResponseModeJWTQuery    = ResponseModeType("query.jwt")
+	ResponseModeJWTFragment = ResponseModeType("fragment.jwt")
+	ResponseModeJWT         = ResponseModeType("jwt")
 )
 
 // AuthorizeRequest is an implementation of AuthorizeRequester

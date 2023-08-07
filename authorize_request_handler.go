@@ -59,6 +59,17 @@ func (f *Fosite) authorizeRequestParametersFromOpenIDConnectRequest(ctx context.
 		return errorsx.WithStack(ErrInvalidRequest.WithHint("OpenID Connect 'request' or 'request_uri' context was given, but the OAuth 2.0 Client does not have any JSON Web Keys registered."))
 	}
 
+	if request.GetResponseTypes().Has("none") {
+		if !request.GetResponseTypes().ExactOne("none") {
+			return errorsx.WithStack(ErrInvalidRequest.WithHint("OpenID Connect response_type value 'none' must not be used with any other response_type."))
+		}
+
+		switch request.GetResponseMode() {
+		case ResponseModeJWT, ResponseModeJWTFormPost, ResponseModeJWTQuery, ResponseModeJWTFragment:
+			return errorsx.WithStack(ErrInvalidRequest.WithHint("OpenID Connect response_type value 'none' must not be used with JWT Secured Authorize Response Modes."))
+		}
+	}
+
 	assertion := request.Form.Get("request")
 	if location := request.Form.Get("request_uri"); len(location) > 0 {
 		if !stringslice.Has(oidcClient.GetRequestURIs(), location) {
@@ -216,19 +227,13 @@ func (f *Fosite) validateResponseTypes(r *http.Request, request *AuthorizeReques
 }
 
 func (f *Fosite) ParseResponseMode(ctx context.Context, r *http.Request, request *AuthorizeRequest) error {
-	switch responseMode := r.Form.Get("response_mode"); responseMode {
-	case string(ResponseModeDefault):
-		request.ResponseMode = ResponseModeDefault
-	case string(ResponseModeFragment):
-		request.ResponseMode = ResponseModeFragment
-	case string(ResponseModeQuery):
-		request.ResponseMode = ResponseModeQuery
-	case string(ResponseModeFormPost):
-		request.ResponseMode = ResponseModeFormPost
+	switch responseMode := ResponseModeType(r.Form.Get("response_mode")); responseMode {
+	case ResponseModeDefault, ResponseModeFragment, ResponseModeQuery, ResponseModeFormPost,
+		ResponseModeJWTFragment, ResponseModeJWTQuery, ResponseModeJWTFormPost, ResponseModeJWT:
+		request.ResponseMode = responseMode
 	default:
-		rm := ResponseModeType(responseMode)
-		if f.ResponseModeHandler(ctx).ResponseModes().Has(rm) {
-			request.ResponseMode = rm
+		if f.ResponseModeHandler(ctx).ResponseModes().Has(responseMode) {
+			request.ResponseMode = responseMode
 			break
 		}
 		return errorsx.WithStack(ErrUnsupportedResponseMode.WithHintf("Request with unsupported response_mode \"%s\".", responseMode))

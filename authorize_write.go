@@ -5,7 +5,9 @@ package fosite
 
 import (
 	"context"
+	"github.com/ory/fosite/token/jarm"
 	"net/http"
+	"net/url"
 )
 
 func (f *Fosite) WriteAuthorizeResponse(ctx context.Context, rw http.ResponseWriter, ar AuthorizeRequester, resp AuthorizeResponder) {
@@ -20,41 +22,88 @@ func (f *Fosite) WriteAuthorizeResponse(ctx context.Context, rw http.ResponseWri
 	wh.Set("Pragma", "no-cache")
 
 	redir := ar.GetRedirectURI()
-	switch rm := ar.GetResponseMode(); rm {
-	case ResponseModeFormPost:
-		//form_post
-		rw.Header().Add("Content-Type", "text/html;charset=UTF-8")
-		WriteAuthorizeFormPostResponse(redir.String(), resp.GetParameters(), GetPostFormHTMLTemplate(ctx, f), rw)
-		return
-	case ResponseModeQuery, ResponseModeDefault:
-		// Explicit grants
-		q := redir.Query()
-		rq := resp.GetParameters()
-		for k := range rq {
-			q.Set(k, rq.Get(k))
+
+	rm := ar.GetResponseMode()
+
+	var getParameters getAuthorizeResponseParams
+
+	switch rm {
+	case ResponseModeJWT:
+		if ar.GetResponseTypes().ExactOne("code") {
+			rm = ResponseModeJWTQuery
+		} else {
+			rm = ResponseModeJWTFragment
 		}
+
+		fallthrough
+	case ResponseModeJWTFormPost, ResponseModeJWTQuery, ResponseModeJWTFragment:
+		getParameters = jarm.GenerateParameters
+	default:
+		getParameters = func(_ context.Context, _ jarm.Configurator, _ jarm.Client, _ any, params url.Values) (parameters url.Values, err error) {
+			return params, nil
+		}
+	}
+
+	var (
+		parameters url.Values
+		err        error
+	)
+
+	switch rm {
+	case ResponseModeFormPost, ResponseModeJWTFormPost:
+		//form_post
+		if parameters, err = getParameters(ctx, f.Config, ar.GetClient(), ar.GetSession(), resp.GetParameters()); err != nil {
+			f.handleWriteAuthorizeErrorJSON(ctx, rw, ErrServerError.WithWrap(err).WithDebug(err.Error()))
+
+			return
+		}
+
+		rw.Header().Add("Content-Type", "text/html;charset=UTF-8")
+
+		WriteAuthorizeFormPostResponse(redir.String(), parameters, GetPostFormHTMLTemplate(ctx, f), rw)
+	case ResponseModeQuery, ResponseModeJWTQuery, ResponseModeDefault:
+		// Explicit grants
+		if parameters, err = getParameters(ctx, f.Config, ar.GetClient(), ar.GetSession(), resp.GetParameters()); err != nil {
+			f.handleWriteAuthorizeErrorJSON(ctx, rw, ErrServerError.WithWrap(err).WithDebug(err.Error()))
+
+			return
+		}
+
+		q := redir.Query()
+
+		for k := range parameters {
+			q.Set(k, parameters.Get(k))
+		}
+
 		redir.RawQuery = q.Encode()
+
 		sendRedirect(redir.String(), rw)
-		return
-	case ResponseModeFragment:
+	case ResponseModeFragment, ResponseModeJWTFragment:
 		// Implicit grants
 		// The endpoint URI MUST NOT include a fragment component.
+		if parameters, err = getParameters(ctx, f.Config, ar.GetClient(), ar.GetSession(), resp.GetParameters()); err != nil {
+			f.handleWriteAuthorizeErrorJSON(ctx, rw, ErrServerError.WithWrap(err).WithDebug(err.Error()))
+
+			return
+		}
+
 		redir.Fragment = ""
 
 		u := redir.String()
-		fr := resp.GetParameters()
-		if len(fr) > 0 {
-			u = u + "#" + fr.Encode()
+
+		if len(parameters) > 0 {
+			u = u + "#" + parameters.Encode()
 		}
+
 		sendRedirect(u, rw)
-		return
 	default:
 		if f.ResponseModeHandler(ctx).ResponseModes().Has(rm) {
 			f.ResponseModeHandler(ctx).WriteAuthorizeResponse(ctx, rw, ar, resp)
-			return
 		}
 	}
 }
+
+type getAuthorizeResponseParams func(ctx context.Context, config jarm.Configurator, client jarm.Client, session any, params url.Values) (parameters url.Values, err error)
 
 // https://tools.ietf.org/html/rfc6749#section-4.1.1
 // When a decision is established, the authorization server directs the

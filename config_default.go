@@ -81,6 +81,16 @@ type Config struct {
 	// IDTokenIssuer sets the default issuer of the ID Token.
 	IDTokenIssuer string
 
+	// JWTSecuredAuthorizeResponseModeIssuer sets the default issuer for the JWT Secured Authorization Response Mode.
+	JWTSecuredAuthorizeResponseModeIssuer string
+
+	// JWTSecuredAuthorizeResponseModeLifespan sets the default lifetime for the tokens issued in the
+	// JWT Secured Authorization Response Mode. Defaults to 10 minutes.
+	JWTSecuredAuthorizeResponseModeLifespan time.Duration
+
+	// JWTSecuredAuthorizeResponseModeSigner is the signer for JWT Secured Authorization Response Mode. Has no default.
+	JWTSecuredAuthorizeResponseModeSigner jwt.Signer
+
 	// HashCost sets the cost of the password hashing cost. Defaults to 12.
 	HashCost int
 
@@ -284,6 +294,14 @@ func (c *Config) GetIDTokenIssuer(ctx context.Context) string {
 	return c.IDTokenIssuer
 }
 
+func (c *Config) GetJWTSecuredAuthorizeResponseModeIssuer(ctx context.Context) string {
+	return c.IDTokenIssuer
+}
+
+func (c *Config) GetJWTSecuredAuthorizeResponseModeSigner(ctx context.Context) jwt.Signer {
+	return c.JWTSecuredAuthorizeResponseModeSigner
+}
+
 // GetGrantTypeJWTBearerIssuedDateOptional returns the GrantTypeJWTBearerIssuedDateOptional field.
 func (c *Config) GetGrantTypeJWTBearerIssuedDateOptional(ctx context.Context) bool {
 	return c.GrantTypeJWTBearerIssuedDateOptional
@@ -360,7 +378,7 @@ func (c *Config) GetAuthorizeCodeLifespan(_ context.Context) time.Duration {
 	return c.AuthorizeCodeLifespan
 }
 
-// GeIDTokenLifespan returns how long an id token should be valid. Defaults to one hour.
+// GetIDTokenLifespan returns how long an id token should be valid. Defaults to one hour.
 func (c *Config) GetIDTokenLifespan(_ context.Context) time.Duration {
 	if c.IDTokenLifespan == 0 {
 		return time.Hour
@@ -385,7 +403,16 @@ func (c *Config) GetRefreshTokenLifespan(_ context.Context) time.Duration {
 	return c.RefreshTokenLifespan
 }
 
-// GetHashCost returns the bcrypt cost factor. Defaults to 12.
+// GetJWTSecuredAuthorizeResponseModeLifespan returns how long a JWT issued by the JWT Secured Authorize Response Mode should be valid. Defaults to 10 minutes.
+func (c *Config) GetJWTSecuredAuthorizeResponseModeLifespan(_ context.Context) time.Duration {
+	if c.JWTSecuredAuthorizeResponseModeLifespan == 0 {
+		return time.Minute * 10
+	}
+
+	return c.JWTSecuredAuthorizeResponseModeLifespan
+}
+
+// GetBCryptCost returns the bcrypt cost factor. Defaults to 12.
 func (c *Config) GetBCryptCost(_ context.Context) int {
 	if c.HashCost == 0 {
 		return DefaultBCryptWorkFactor

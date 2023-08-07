@@ -71,6 +71,12 @@ type OpenIDConnectClient interface {
 	GetTokenEndpointAuthSigningAlgorithm() string
 }
 
+type JARMClient interface {
+	GetAuthorizationSignedResponseAlgorithm() string
+	GetAuthorizationEncryptedResponseAlgorithm() string
+	GetAuthorizationEncryptedResponseEncryptionAlgorithm() string
+}
+
 // ResponseModeClient represents a client capable of handling response_mode
 type ResponseModeClient interface {
 	// GetResponseMode returns the response modes that client is allowed to send

@@ -101,6 +101,9 @@ type Configurator interface {
 	OmitRedirectScopeParamProvider
 	SanitationAllowedProvider
 	JWTScopeFieldProvider
+	JWTSecuredAuthorizeResponseModeIssuerProvider
+	JWTSecuredAuthorizeResponseModeSignerProvider
+	JWTSecuredAuthorizeResponseModeLifespanProvider
 	AccessTokenIssuerProvider
 	DisableRefreshTokenValidationProvider
 	RefreshTokenScopesProvider
